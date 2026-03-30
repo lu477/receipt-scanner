@@ -1,6 +1,6 @@
 # Web Receipt Scanner
 
-A simple website to scan Serbian fiscal receipt QR codes from a photo and download the PDF — no app, no login, no Google Drive.
+A simple website to scan Serbian fiscal receipt QR codes from a photo and download the PDF.
 
 ## Features
 - Upload an image (file picker or drag & drop)
