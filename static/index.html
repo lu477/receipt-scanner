@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="title">Provera Fiskalnog Računa</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<header>
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang="sr">SR</button>
+    <button class="lang-btn" data-lang="en">EN</button>
+  </div>
+  <h1 data-i18n="title">🧾 Provera Fiskalnog Računa</h1>
+  <p data-i18n="subtitle">Skeniraj QR kod sa fiskalnog računa, odmah preuzmite PDF sa PDV-om ako je racun validan.</p>
+</header>
+
+<main>
+  <div class="card">
+
+    <!-- Drop zone -->
+    <div class="drop-zone" id="drop-zone">
+      <input type="file" id="file-input" accept="image/*" />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+      </svg>
+      <p><strong data-i18n="dropClick">Kliknite za pripremu</strong> <span data-i18n="dropOr">ili prevucite i pustite</span></p>
+      <p style="margin-top:4px; font-size:.82rem;" data-i18n="dropHint">JPEG, PNG, WebP — do 20 MB</p>
+    </div>
+
+    <!-- Camera buttons -->
+    <div class="camera-row">
+      <button class="btn btn-outline" id="cam-back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M15.5 6.5h.01M2 8.4V15.6a2 2 0 001.1 1.789l7 3.5a2 2 0 001.8 0l7-3.5A2 2 0 0020 15.6V8.4a2 2 0 00-1.1-1.789l-7-3.5a2 2 0 00-1.8 0l-7 3.5A2 2 0 002 8.4z"/>
+        </svg>
+        <span data-i18n="btnBackCam">Zadnja kamera</span>
+      </button>
+      <button class="btn btn-outline" id="cam-front-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.888L15 14"/>
+          <rect x="2" y="6" width="13" height="12" rx="2"/>
+        </svg>
+        <span data-i18n="btnFrontCam">Veb kamera / prednja</span>
+      </button>
+    </div>
+
+    <!-- Preview -->
+    <div id="preview-wrap">
+      <img id="preview-img" alt="Receipt preview" />
+      <button id="crop-btn" title="Crop image">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M6 2v14a2 2 0 002 2h14"/><path d="M18 22V8a2 2 0 00-2-2H2"/>
+        </svg>
+        <span data-i18n="cropBtnLabel">Iseci</span>
+      </button>
+      <button id="clear-btn" title="Remove image">✕</button>
+    </div>
+
+    <!-- Scan button -->
+    <button class="btn btn-primary" id="scan-btn" disabled data-i18n="btnScan">
+      Skeniraj račun
+    </button>
+
+    <!-- Status message -->
+    <div id="status">
+      <div class="spinner" id="spinner"></div>
+      <span id="status-text"></span>
+    </div>
+
+    <!-- Download button -->
+    <button class="btn btn-primary" id="download-btn" data-i18n="btnDownload">
+      ⬇ Preuzmi PDF
+    </button>
+
+    <!-- Email section -->
+    <div id="email-section">
+      <div class="email-row">
+        <input type="email" id="email-input" data-i18n-placeholder="emailPlaceholder" placeholder="Pošalji na email adresu…" autocomplete="email" />
+        <button id="email-send-btn" data-i18n="btnEmailSend">Pošalji</button>
+      </div>
+      <span id="email-status"></span>
+    </div>
+
+  </div>
+</main>
+
+<!-- Camera modal -->
+<div id="cam-modal" role="dialog" aria-modal="true" aria-label="Camera">
+  <div class="cam-modal-inner">
+    <div class="cam-modal-header">
+      <h2 id="cam-modal-title"></h2>
+      <button id="cam-close" aria-label="Close camera">✕</button>
+    </div>
+    <video id="cam-video" autoplay playsinline muted></video>
+    <p id="cam-error"></p>
+    <div class="cam-actions">
+      <button id="cam-capture">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor"/>
+        </svg>
+        <span data-i18n="camCaptureBtn">Uslikaj</span>
+      </button>
+      <button id="cam-switch" data-i18n="camSwitchBtn">⇄ Promeni kameru</button>
+    </div>
+    <canvas id="cam-canvas" style="display:none"></canvas>
+  </div>
+</div>
+
+<!-- Crop modal -->
+<div id="crop-modal" role="dialog" aria-modal="true" aria-label="Crop image">
+  <div class="crop-modal-inner">
+    <div class="cam-modal-header">
+      <h2 data-i18n="cropTitle">Iseci sliku</h2>
+      <button id="crop-close" aria-label="Close crop" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <div id="crop-canvas-wrap">
+      <canvas id="crop-canvas"></canvas>
+    </div>
+    <p class="crop-hint" data-i18n="cropHint">Prevucite da odaberete oblast koju želite da zadržite</p>
+    <div class="cam-actions">
+      <button id="crop-confirm" class="btn btn-primary" style="margin-top:0; flex:1;" data-i18n="cropApply">Primeni isecanje</button>
+      <button id="crop-reset" class="btn btn-outline" style="flex:0 0 auto; padding:11px 18px;" data-i18n="cropReset">Resetuj</button>
+    </div>
+  </div>
+</div>
+
+<!-- Donation bar -->
+<div class="donation-bar">
+  <div class="donation-inner">
+    <span class="donation-label">
+      ☕ <a href="https://ko-fi.com/filipu_kafica" target="_blank" rel="noopener">Kupite mi kaficu</a>
+    </span>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
